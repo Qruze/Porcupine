@@ -11,21 +11,13 @@ namespace Porcupine.App_Code
         bool firstPart = true;
         DateTime endDate = new DateTime();
         public void UpdateProject(ref Project project, Part updatedPart = null, double? diffBussnissDays = null)
-        {
-            
+        {            
             Project projectChanged = new Project();
             List<Part> newParts = new List<Part>();
 
             if (updatedPart != null && updatedPart.Id > 1)
             {
-                var updatedDate = updatedPart.StartDate;
-                var updatedId = updatedPart.Id;
-                var updatedNumOfDays = updatedPart.NumOfDays;
-                var updatedOnlyWorkDays = updatedPart.OnlyWorkDays;
-
                 var prevPart = project.Parts.First(x => x.Id == 1);
-                var prevPartNumOfWorkDays = prevPart.NumOfDays;
-                var prevPartOnlyWorkDays = prevPart.OnlyWorkDays;
                 var newStartDate = Helpers.dataTimeExtensions.addBusinessDays(prevPart.StartDate, (int)diffBussnissDays);
                 newStartDate = Helpers.dataTimeExtensions.getThisOrPrevWorkday(newStartDate);
 
@@ -60,6 +52,8 @@ namespace Porcupine.App_Code
                 {
                     if (p.OnlyWorkDays)
                     {
+                        startDate = Helpers.dataTimeExtensions.getThisOrNextWorkday(startDate);
+                        /*
                         if (dayOfWeek == DayOfWeek.Saturday)
                         {
                             startDate = startDate.AddDays(3);
@@ -72,12 +66,12 @@ namespace Porcupine.App_Code
                         {
                             startDate = startDate.AddDays(1);
                         }
+                        */
                     }
                     else
                     {
                         startDate = startDate.AddDays(1);
                     }
-
 
                     endDate = startDate;
                     dayOfWeek = endDate.DayOfWeek;
