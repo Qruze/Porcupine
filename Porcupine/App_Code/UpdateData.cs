@@ -11,7 +11,7 @@ namespace Porcupine.App_Code
         bool firstPart = true;
         DateTime endDate = new DateTime();
         public void UpdateProject(ref Project project, Part updatedPart = null, double? diffBussnissDays = null)
-        {            
+        {
             Project projectChanged = new Project();
             List<Part> newParts = new List<Part>();
 
@@ -52,7 +52,14 @@ namespace Porcupine.App_Code
                 {
                     if (p.OnlyWorkDays)
                     {
-                        startDate = Helpers.dataTimeExtensions.getThisOrNextWorkday(startDate);
+                        if (Helpers.dataTimeExtensions.isWeekendOrHolyday(startDate))
+                        {
+                            startDate = Helpers.dataTimeExtensions.getThisOrNextWorkday(startDate);
+                        }
+                        else
+                        {
+                            startDate = startDate.AddDays(1);
+                        }
                         /*
                         if (dayOfWeek == DayOfWeek.Saturday)
                         {
@@ -71,8 +78,8 @@ namespace Porcupine.App_Code
                     else
                     {
                         startDate = startDate.AddDays(1);
-                    }
-
+                    }                    
+                    
                     endDate = startDate;
                     dayOfWeek = endDate.DayOfWeek;
                     i++;
