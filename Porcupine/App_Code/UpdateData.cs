@@ -8,13 +8,37 @@ namespace Porcupine.App_Code
 {
     public class UpdateData
     {
-        public void UpdateProject(ref Project project)
+        bool firstPart = true;
+        DateTime endDate = new DateTime();
+        public void UpdateProject(ref Project project, Part updatedPart = null, double? diffBussnissDays = null)
         {
-            var firstPart = true;
-            DateTime endDate = new DateTime();
+            
             Project projectChanged = new Project();
-            List<Part> updatedParts = new List<Part>();
+            List<Part> newParts = new List<Part>();
 
+            if (updatedPart != null && updatedPart.Id > 1)
+            {
+                var updatedDate = updatedPart.StartDate;
+                var updatedId = updatedPart.Id;
+                var updatedNumOfDays = updatedPart.NumOfDays;
+                var updatedOnlyWorkDays = updatedPart.OnlyWorkDays;
+
+                var prevPart = project.Parts.First(x => x.Id == 1);
+                var prevPartNumOfWorkDays = prevPart.NumOfDays;
+                var prevPartOnlyWorkDays = prevPart.OnlyWorkDays;
+                var newStartDate = Helpers.dataTimeExtensions.addBusinessDays(prevPart.StartDate, (int)diffBussnissDays);
+                newStartDate = Helpers.dataTimeExtensions.getThisOrPrevWorkday(newStartDate);
+
+                project.Parts.First(x => x.Id == 1).StartDate = newStartDate;
+            }
+            newParts = updateInfo(ref project);
+
+            project.Parts = newParts;
+        }
+
+        private List<Part> updateInfo(ref Project project)
+        {
+            List<Part> newParts = new List<Part>();
             foreach (Part p in project.Parts)
             {
                 DateTime startDate;
@@ -29,10 +53,10 @@ namespace Porcupine.App_Code
                     p.StartDate = startDate;
                 }
                 var dayOfWeek = startDate.DayOfWeek;
-                
+
                 var i = 1;
-                
-                while (i <= p.NumOfDays )
+
+                while (i <= p.NumOfDays)
                 {
                     if (p.OnlyWorkDays)
                     {
@@ -40,7 +64,7 @@ namespace Porcupine.App_Code
                         {
                             startDate = startDate.AddDays(3);
                         }
-                        else if (dayOfWeek == DayOfWeek.Sunday) 
+                        else if (dayOfWeek == DayOfWeek.Sunday)
                         {
                             startDate = startDate.AddDays(2);
                         }
@@ -54,16 +78,15 @@ namespace Porcupine.App_Code
                         startDate = startDate.AddDays(1);
                     }
 
-                    
+
                     endDate = startDate;
                     dayOfWeek = endDate.DayOfWeek;
                     i++;
                 }
-                
-                updatedParts.Add(p);                                
-            }
 
-            project.Parts = updatedParts;
+                newParts.Add(p);
+            }
+            return newParts;
         }
     }
 }

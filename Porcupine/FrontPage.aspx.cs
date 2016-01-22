@@ -67,12 +67,19 @@ namespace Porcupine
             {
                 
                 var selectedPart = project.Parts.Find(x => x.Id == id);
+                var oldDate = selectedPart.StartDate;
 
                 TryUpdateModel(selectedPart);
 
+                var newDate = selectedPart.StartDate;
+
                 if (ModelState.IsValid)
                 {
-                    updateDataProject.UpdateProject(ref project);
+                    var diffBussinessDays = Helpers.dataTimeExtensions.diffBusinessDays(oldDate, newDate);
+                    if (diffBussinessDays != 0d)
+                        updateDataProject.UpdateProject(ref project, selectedPart, diffBussinessDays);
+                    else
+                        updateDataProject.UpdateProject(ref project);
                 }
                 
             }
